@@ -1,0 +1,38 @@
+<div class="modal" id="registrationModal">
+    <div class="modal-content">
+        <span class="close" id="closeModal">×</span>
+
+        <div class="card">
+            <div class="cardcontainer">
+                <h2 class="title" id="courseTitle">Course Title</h2>
+                <h2 class="profname" id="profName">Professor Name</h2>
+                <div id="topbuttons" class="topbuttons">
+                    <button class="matbut" id="rateMyProf" style="background: #4CAF50;"> RMP </button>
+                    <button class="matbut" id="textbook" style="background: #FFC107;"> Textbook </button>
+                    <button class="matbut" id="syllabi"> Past Syllabi </button>
+                    <button class="matbut" id="saveCourse" style="background: #F44336;"> Save Course +</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="cardcontainer">
+                <div class="chartloader">
+                    <div class="loader" id="descload"></div>
+                </div>
+                <ul class="description" id="description" style="list-style-type:disc"></ul>
+            </div>
+        </div>
+
+        <div class="card" style="text-align:center">
+            <select id="semesters" style="text-align-last:center;color:#666666;fill:#666666;">
+            </select>
+            <div class="chartloader">
+                <div class="loader" id="chartload"></div>
+            </div>
+            <div id="chartcontainer" class="cardcontainer">
+                <div id="chart"></div>
+            </div>
+        </div>
+    </div>
+</div>

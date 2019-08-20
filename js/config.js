@@ -1,10 +1,3 @@
-class Timing {
-    static fade_time = 100;
-    static calendar_fade_time = 100;
-    static button_delay = 75;
-}
-
-
 class Colors {
     static material_colors = ['#4CAF50', '#CDDC39',
         '#FFC107', '#2196F3', '#F57C00', '#9C27B0', '#FF5722', '#673AB7',
@@ -39,7 +32,6 @@ class Export {
 class Popup {
     static num_semesters = 2;
 }
-
 
 class Text {
     static emptyText() {
