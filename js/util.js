@@ -1,13 +1,3 @@
-function injectRegistrationModal() {
-    // Inject files that will be used in the registration modal
-    injectCSS("css/styles.css");
-    injectJS("js/registration-modal.js");
-    
-    $.get(chrome.extension.getURL("html/registration-modal-template.html"), function(data) {
-        $(data).css("display", "none").appendTo("body");
-    });
-}
-
 function setMultipleAttributes(element, attributeList) {
     attributeList.forEach(function (attribute) {
         element.setAttribute(attribute.name, attribute.value)
@@ -43,4 +33,121 @@ function injectJS(jsURL) {
     $("head").append($("<script>")
         .attr("type","text/javascript")
         .attr("src", path));
+}
+
+function buildChartConfig(data) {
+    return {
+        chart: {
+            type: 'column',
+            backgroundColor: ' #fefefe',
+            spacingLeft: 10
+        },
+        title: {
+            text: null
+        },
+        subtitle: {
+            text: null
+        },
+        legend: {
+            enabled: false
+        },
+        xAxis: {
+            title: {
+                text: 'Grades'
+            },
+            categories: [
+                'A+',
+                'A',
+                'A-',
+                'B+',
+                'B',
+                'B-',
+                'C+',
+                'C',
+                'C-',
+                'D+',
+                'D',
+                'D-',
+                'F',
+                'W'
+            ],
+            crosshair: true
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Students'
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        lang: {
+            noData: "The professor hasn't taught this class :("
+        },
+        tooltip: {
+            headerFormat: '<span style="font-size:small; font-weight:bold">{point.key}</span><table>',
+            pointFormat: '<td style="color:{black};padding:0;font-size:small; font-weight:bold;"><b>{point.y:.0f} Students</b></td>',
+            footerFormat: '</table>',
+            shared: true,
+            useHTML: true
+        },
+        plotOptions: {
+            bar: {
+                pointPadding: 0.2,
+                borderWidth: 0
+            },
+            series: {
+                animation: {
+                    duration: 700
+                }
+            }
+        },
+        series: [{
+            name: 'Grades',
+            data: [{
+                y: data["A+"],
+                color: '#4CAF50'
+            }, {
+                y: data["A"],
+                color: '#4CAF50'
+            }, {
+                y: data["A-"],
+                color: '#8BC34A'
+            }, {
+                y: data["B+"],
+                color: '#CDDC39'
+            }, {
+                y: data["B"],
+                color: '#FFEB3B'
+            }, {
+                y: data["B-"],
+                color: '#FFC107'
+            }, {
+                y: data["C+"],
+                color: '#FFA000'
+            }, {
+                y: data["C"],
+                color: '#F57C00'
+            }, {
+                y: data["C-"],
+                color: '#FF5722'
+            }, {
+                y: data["D+"],
+                color: '#FF5252'
+            }, {
+                y: data["D"],
+                color: '#E64A19'
+            }, {
+                y: data["D-"],
+                color: '#F44336'
+            }, {
+                y: data["F"],
+                color: '#D32F2F'
+            }, {
+                y: data["W"],
+                color: '#666666'
+            }]
+        }]
+    }
 }

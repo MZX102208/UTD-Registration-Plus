@@ -3,11 +3,14 @@ $(document).ready(function() {
     addRegistrationPlusColumn(); // Try to modify the class tables if the course table is populated when the page first loads
 });
 
-// Using a Mutation Observer to detect when course search results are updated
+// Using a Mutation Observer to detect changes in the site's html
 var observer = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
         if (mutation.target.className == "rowcount") { // Check if the course table has been modified
             addRegistrationPlusColumn();
+        }
+        if (mutation.target.id == "registrationModal") {
+            updateModalGradeDist();
         }
     })
 });
@@ -48,8 +51,11 @@ function createRegistrationButtonElement(rowNumber) {
         { name: "style", value: "display:inline-block;" },
         { name: "width", value: "30" }, { name: "height", value: "30" }
     ]);
-    registrationButton.setAttribute("onclick", "getCourseInfo(" + rowNumber + ")");
     registrationButton.src = chrome.extension.getURL("images/disticon.png");
     element.appendChild(registrationButton);
     return element;
 }
+
+$("body").on('click', '.distButton', function () {
+	openRegistrationModal($(this).closest('tr'));
+});
