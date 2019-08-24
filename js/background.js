@@ -8,7 +8,7 @@ chrome.runtime.onInstalled.addListener(function() {
 chrome.runtime.onMessage.addListener(function (request, sender, response) {
   switch (request.command) {
       case "gradesQuery":
-        queryGrades();
+        queryGrades(request, response);
         break;
       default:
         genericHttpRequest(request, response);
