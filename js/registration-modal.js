@@ -43,7 +43,7 @@ function populateGradeDistDropdown(semesters) {
 		for (var i = 0; i < semesters.length; i++) {
 			sems.push($(`<option value="${semesters[i]}">${semesters[i]}</option>`));
 		}
-		$("#semesters").append(sems);
+		$("#semesters").html(sems);
     }
 }
 
