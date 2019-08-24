@@ -9,9 +9,6 @@ var observer = new MutationObserver(function(mutations) {
         if (mutation.target.className == "rowcount") { // Check if the course table has been modified
             addRegistrationPlusColumn();
         }
-        if (mutation.target.id == "registrationModal") {
-            updateModalGradeDist();
-        }
     })
 });
 observer.observe(document, { childList: true, subtree: true });
@@ -33,7 +30,7 @@ function addRegistrationPlusColumn() {
     
     // Append body columns
     for (let i = 0; i < tableBodyRows.length; i++) {
-        appendNewColumn(tableBodyRows.eq(i), "td", createRegistrationButtonElement(i));
+        appendNewColumn(tableBodyRows.eq(i), "td", createRegistrationButtonElement());
 
         // Duplicate the onclick attribute to the plus column so the default course menu doesn't open
         var rowOnClick = tableBodyRows.eq(i).attr("onclick");
@@ -41,7 +38,7 @@ function addRegistrationPlusColumn() {
     }
 }
 
-function createRegistrationButtonElement(rowNumber) {
+function createRegistrationButtonElement() {
     var element = document.createElement("td");
     element.setAttribute("style", "text-align: center");
     var registrationButton = document.createElement("input");

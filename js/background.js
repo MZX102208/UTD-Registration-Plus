@@ -8,32 +8,39 @@ chrome.runtime.onInstalled.addListener(function() {
 chrome.runtime.onMessage.addListener(function (request, sender, response) {
   switch (request.command) {
       case "gradesQuery":
-        var result;
-        if (!grades[request.profName] || !grades[request.profName][request.className]) { // Handle the case if there is no data
-          result = {}
-        } else {
-          result = grades[request.profName][request.className];
-        }
-        response({ data: result });
+        queryGrades();
         break;
       default:
-        const xhr = new XMLHttpRequest();
-        const method = request.method ? request.method.toUpperCase() : "GET";
-        xhr.open(method, request.url, true);
-        console.log(request);
-        xhr.onload = () => {
-          console.log(xhr.responseUrl);
-          response(xhr.responseText);
-        }
-        xhr.onerror = () => response(xhr.statusText);
-        if (method == "POST") {
-          xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        }
-        xhr.send(request.data);
+        genericHttpRequest(request, response);
         break;
   }
   return true;
 });
+
+function queryGrades(request, response) {
+  var result;
+  if (!grades[request.profName] || !grades[request.profName][request.className]) { // Handle the case if there is no data
+    result = {}
+  } else {
+    result = grades[request.profName][request.className];
+  }
+  response({ data: result });
+}
+
+function genericHttpRequest(request, response) {
+  const xhr = new XMLHttpRequest();
+  const method = request.method ? request.method.toUpperCase() : "GET";
+  xhr.open(method, request.url, true);
+  xhr.onload = () => {
+    console.log(xhr.responseUrl);
+    response(xhr.responseText);
+  }
+  xhr.onerror = () => response(xhr.statusText);
+  if (method == "POST") {
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  }
+  xhr.send(request.data);
+}
 
 function loadGradesJson() {
   var fileNames = ["fall2017", "spring2018", "summer2018", "fall2018", "spring2019"]

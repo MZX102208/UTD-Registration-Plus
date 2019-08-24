@@ -97,6 +97,8 @@ function setChart(data) {
 $("body").on('click', '#registrationModal', function (event) {
     switch (event.target.id) {
         case "registrationModal":
+            close();
+            break;
         case "closeModal":
             close();
             break;
