@@ -1,8 +1,8 @@
 class Colors {
-    static material_colors = ['#4CAF50', '#CDDC39',
-        '#FFC107', '#2196F3', '#F57C00', '#9C27B0', '#FF5722', '#673AB7',
-        '#FF5252', '#E91E63', '#009688', '#00BCD4',
-        '#4E342E', '#424242', '#9E9E9E'
+    static material_colors = ["#4CAF50", "#CDDC39",
+        "#FFC107", "#2196F3", "#F57C00", "#9C27B0", "#FF5722", "#673AB7",
+        "#FF5252", "#E91E63", "#009688", "#00BCD4",
+        "#4E342E", "#424242", "#9E9E9E"
     ];
     static open = "#4CAF50";
     static waitlisted = "#FF9800";
@@ -35,12 +35,12 @@ class Popup {
 
 class Text {
     static emptyText() {
-        let arr = ["Doesn't Look Like Anything To Me.", "You Can't Fail Classes You're Not In.", "Pro-Tip: Don't Take O-Chem.",
+        let arr = ["Doesn"t Look Like Anything To Me.", "You Can"t Fail Classes You"re Not In.", "Pro-Tip: Don"t Take O-Chem.",
             "No Work Happens On PCL 5th Floor.", "Sophomore But Freshman By Credit.", "Pain is temporary, GPA is forever.",
-            "You've Yee'd Your Last Haw.", "lol everything is already waitlisted.", "At Least You're Not At A&M.",
-            `It's ${moment().format("h:mm")} and OU Still Sucks.`, 'TeXAs iS BaCK GuYZ', "'Academically Challenged'",
-            'Does McCombs teach Parseltongue?', 'Lets make Daddy Fenves proud.', 'Feel bad if you say Wampus.', 'No Cruce Enfrente Del Bus.',
-            'Midterm 1 has been Unmuted', 'Omae Wa Mou Shindeiru...', 'Bevo Bucks are the new Bitcoin'
+            "You"ve Yee"d Your Last Haw.", "lol everything is already waitlisted.", "At Least You"re Not At A&M.",
+            `It"s ${moment().format("h:mm")} and OU Still Sucks.`, "TeXAs iS BaCK GuYZ", ""Academically Challenged"",
+            "Does McCombs teach Parseltongue?", "Lets make Daddy Fenves proud.", "Feel bad if you say Wampus.", "No Cruce Enfrente Del Bus.",
+            "Midterm 1 has been Unmuted", "Omae Wa Mou Shindeiru...", "Bevo Bucks are the new Bitcoin"
         ]
         let index = Math.floor(Math.random() * arr.length);
 

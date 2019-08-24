@@ -1,21 +1,37 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+var manifestData = chrome.runtime.getManifest();
+$("#version").text(manifestData.version);
+chrome.storage.sync.get("courseConflictHighlight", function (data) {
+	if (data.courseConflictHighlight) {
+		off("courseConflictHighlight");
+	} else {
+		on("courseConflictHighlight");
+	}
+});
 
-'use strict';
+$("#togglecourseConflictHighlight").click(function () {
+	var action = $("#togglecourseConflictHighlight").text();
+	if (action == "Turn Off") {
+		chrome.storage.sync.set({
+			courseConflictHighlight: false
+		}, function () {
+			on("courseConflictHighlight");
+		});
+	} else {
+		chrome.storage.sync.set({
+			courseConflictHighlight: true
+		}, function () {
+			off("courseConflictHighlight");
+		});
+	}
+	updateAllTabsCourseTableHighlightsCall();
+});
 
-let page = document.getElementById('buttonDiv');
-const kButtonColors = ['#3aa757', '#e8453c', '#f9bb2d', '#4688f1'];
-function constructOptions(kButtonColors) {
-  for (let item of kButtonColors) {
-    let button = document.createElement('button');
-    button.style.backgroundColor = item;
-    button.addEventListener('click', function() {
-      chrome.storage.sync.set({color: item}, function() {
-        console.log('color is ' + item);
-      })
-    });
-    page.appendChild(button);
-  }
+function on(setting) {
+	$("#toggle" + setting).text("Turn On");
+	$("#toggle" + setting).css("background", "#4CAF50");
 }
-constructOptions(kButtonColors);
+
+function off(setting) {
+	$("#toggle" + setting).text("Turn Off");
+	$("#toggle" + setting).css("background", "#F44336");
+}

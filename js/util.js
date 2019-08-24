@@ -4,13 +4,13 @@ function setMultipleAttributes(element, attributeList) {
     });
 }
 
-function getFirstChild(jQueryElement, childTagName) {
-    return jQueryElement.children(childTagName).eq(0);
+function getFirstChild(jQueryElement, childSelector) {
+    return jQueryElement.children(childSelector).eq(0);
 }
 
-function getFirstDescendant(jQueryElement, childTagNames) {
+function getFirstDescendant(jQueryElement, childSelectors) {
     let currentElement = jQueryElement;
-    childTagNames.forEach(function(tagName)  {
+    childSelectors.forEach(function (tagName)  {
         currentElement = getFirstChild(currentElement, tagName);
     })
     return currentElement;
@@ -21,7 +21,7 @@ function appendNewColumn(jQueryElement, columnTagName, newColumnElement) {
 }
 
 function injectCSS(cssURL) {
-    var path = chrome.extension.getURL(cssURL);
+    let path = chrome.extension.getURL(cssURL);
     $("head").append($("<link>")
         .attr("rel","stylesheet")
         .attr("type","text/css")
@@ -29,10 +29,30 @@ function injectCSS(cssURL) {
 }
 
 function injectJS(jsURL) {
-    var path = chrome.extension.getURL(jsURL);
+    let path = chrome.extension.getURL(jsURL);
     $("head").append($("<script>")
         .attr("type","text/javascript")
         .attr("src", path));
+}
+
+function updateAllTabsRegistrationModalCall(isSaveable) {
+    chrome.runtime.sendMessage({
+        command: "updateAllTabsRegistrationModal",
+        isSaveable: isSaveable
+	});
+}
+
+function updateAllTabsCourseTableHighlightsCall() {
+    chrome.runtime.sendMessage({
+        command: "updateAllTabsCourseTableHighlights"
+	});
+}
+
+function checkUserOption(optionName, executeIfEnabled, executeIfDisabled) {
+    chrome.storage.sync.get(optionName, function (data) {
+        if (data[optionName]) executeIfEnabled();
+        else executeIfDisabled();
+    });
 }
 
 function buildChartConfig(data) {
@@ -150,4 +170,28 @@ function buildChartConfig(data) {
             }]
         }]
     }
+}
+
+/*********************  UTD Specific Utils  ************************/
+
+function getScheduleBlocksFromElement(jQueryCourseRowElement) {
+    let scheduleBlocks = [];
+    let classScheduleElements = jQueryCourseRowElement.children("td").eq(4).children(".clstbl__resultrow__schedule");
+    for (let i = 0; i < classScheduleElements.length; i++) {
+        let scheduleElement = classScheduleElements.eq(i);
+
+        let daysToBeScheduled = getFirstChild(scheduleElement, ".clstbl__resultrow__day").text().split(/, | & /);
+        let timeScheduled = getFirstChild(scheduleElement, ".clstbl__resultrow__time").text().split(/ - /g);
+        let scheduledLocation = getFirstChild(scheduleElement, ".clstbl__resultrow__location").text();
+        daysToBeScheduled.forEach(function (day) {
+            let timeBlock = new ScheduleBlock(day, timeScheduled[0], timeScheduled[1], scheduledLocation);
+            scheduleBlocks.push(timeBlock);
+        })
+    }
+    return scheduleBlocks;
+}
+
+function getClassUID(jQueryCourseRowElement) {
+    let classInfo = getFirstChild(jQueryCourseRowElement.children("td").eq(1), "a").text(); // Get class info to remove from html text
+    return jQueryCourseRowElement.children("td").eq(1).text().replace("\"", "").replace(classInfo, ""); // Isolate the unique class id
 }

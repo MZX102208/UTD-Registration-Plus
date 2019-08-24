@@ -2,7 +2,10 @@
   "name": "UTD Registration Plus",
   "version": "1.0",
   "description": "Improves the course registration process at the University of Texas at Dallas!",
-  "permissions": ["activeTab", "declarativeContent", "storage"],
+  "permissions": ["tabs",
+    "declarativeContent",
+    "storage",
+    "*://coursebook.utdallas.edu/*"],
   "options_page": "options.html",
   "background": {
     "scripts": ["js/background.js"],
@@ -11,7 +14,8 @@
   "content_scripts": [{
     "css": ["css/styles.css"],
     "js": ["lib/jquery-3.4.1.min.js", "lib/jquery.initialize.min.js", "lib/highcharts.js",
-           "js/util.js", "js/content.js", "js/registration-modal.js", "js/schedule-manager.js"],
+           "js/util.js", "js/content.js", "js/registration-modal.js",
+           "objects/schedule-block.js", "objects/course.js"],
     "matches": ["https://coursebook.utdallas.edu/*"]
   }],
   "web_accessible_resources": [
