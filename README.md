@@ -29,9 +29,3 @@ This extension tries to streamline most of the unnecessary steps and headaches o
 <p align="center"> 
 <img src="https://lh3.googleusercontent.com/x95blI5D1mseNPLOtHETlLmoVtHm0eeye9uyeWSDd5W6m6fSoZxMMMyQTGUFo5swoTgRivGVyw=w640-h400-e365">
 </p>
-<p align="center"> 
-<img src="https://lh3.googleusercontent.com/bbey8OGOTtJWUaHGVIU5wewbWg6X6s-gjD15RwXHhvgH_9kax2mE4bcrjem_iZGH-q5z6NT7g94=w640-h400-e365">
-</p>
-
-
-
