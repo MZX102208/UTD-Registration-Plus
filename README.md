@@ -1,11 +1,11 @@
-# UT Registration Plus
+# UTD Registration Plus
 [Try it for yourself on the Chrome Web Store](https://chrome.google.com/webstore/detail/hboadpjkoaieogjimneceaahlppnipaa)
 
-We've all been there. 20 tabs of Rate My Professor, Catalyst, and the UT Course Catalog open and you still don't know what classes to take. 
-This extension tries to streamline most of the unnecessary steps and headaches of registering for classes at UT Austin. 
+We've all been there. 20 tabs of Rate My Professor, Catalyst, and the UTD Course Catalog open and you still don't know what classes to take. 
+This extension tries to streamline most of the unnecessary steps and headaches of registering for classes at UT Dallas. 
 
 
-- For each class on the UT Course Catalog it provides a "breakdown" popup, with quick and easy links to the RateMyProfessor and eCIS pages of the professor, as well as syllabi from when the professor taught the class in the past. 
+- For each class on the UTD Course Catalog it provides a "breakdown" popup, with quick and easy links to the RateMyProfessor
 
 - Gets the course description and highlight the important information like prerequisites, restrictions, etc. 
 
