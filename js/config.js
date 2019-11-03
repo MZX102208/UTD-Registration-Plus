@@ -35,15 +35,20 @@ class Popup {
 
 class Text {
     static emptyText() {
-        let arr = ["Doesn"t Look Like Anything To Me.", "You Can"t Fail Classes You"re Not In.", "Pro-Tip: Don"t Take O-Chem.",
+        let arr = ["Doesn't Look Like Anything To Me.", "You Can't Fail Classes You're Not In.", "Pro-Tip: Don't Take O-Chem.",
             "No Work Happens On PCL 5th Floor.", "Sophomore But Freshman By Credit.", "Pain is temporary, GPA is forever.",
-            "You"ve Yee"d Your Last Haw.", "lol everything is already waitlisted.", "At Least You"re Not At A&M.",
-            `It"s ${moment().format("h:mm")} and OU Still Sucks.`, "TeXAs iS BaCK GuYZ", ""Academically Challenged"",
-            "Does McCombs teach Parseltongue?", "Lets make Daddy Fenves proud.", "Feel bad if you say Wampus.", "No Cruce Enfrente Del Bus.",
-            "Midterm 1 has been Unmuted", "Omae Wa Mou Shindeiru...", "Bevo Bucks are the new Bitcoin"
+            "You've Yee'd Your Last Haw.", "lol everything is already waitlisted.", "At Least You're Not At A&M.", 'TeXAs iS BaCK GuYZ', "'Academically Challenged'",
+            'Does McCombs teach Parseltongue?', 'Lets make Daddy Fenves proud.', 'Feel bad if you say Wampus.', 'No Cruce Enfrente Del Bus.',
+            'Midterm 1 has been Unmuted', 'Omae Wa Mou Shindeiru...', 'Bevo Bucks are the new Bitcoin'
         ]
         let index = Math.floor(Math.random() * arr.length);
 
         return arr[index];
     }
+}
+
+class Timing {
+    static fade_time = 100;
+    static calendar_fade_time = 100;
+    static button_delay = 75;
 }

@@ -1,3 +1,13 @@
+let dayToAbbreviationMap = {
+    "Sunday" : "Sun",
+    "Monday" : "Mon",
+    "Tuesday" : "Tu",
+    "Wednesday" : "Wed",
+    "Thursday" : "Th",
+    "Friday" : "Fri",
+    "Saturday" : "Sat"
+}
+
 function setMultipleAttributes(element, attributeList) {
     attributeList.forEach(function (attribute) {
         element.setAttribute(attribute.name, attribute.value)
@@ -8,12 +18,18 @@ function getFirstChild(jQueryElement, childSelector) {
     return jQueryElement.children(childSelector).eq(0);
 }
 
+// Gets the first descendant by traversing the path using a list of selectors
 function getFirstDescendant(jQueryElement, childSelectors) {
     let currentElement = jQueryElement;
     childSelectors.forEach(function (tagName)  {
         currentElement = getFirstChild(currentElement, tagName);
     })
     return currentElement;
+}
+
+// Gets the first descendant by using the find method on a single selector
+function findFirstDescendant(jQueryElement, descendantSelector) {
+    return jQueryElement.find(descendantSelector).eq(0);
 }
 
 function appendNewColumn(jQueryElement, columnTagName, newColumnElement) {
@@ -35,10 +51,15 @@ function injectJS(jsURL) {
         .attr("src", path));
 }
 
-function updateAllTabsRegistrationModalCall(isSaveable) {
+function updateAllTabsCourseData() {
+    updateAllTabsRegistrationModalCall();
+    updateAllTabsCourseTableHighlightsCall();
+    updateAllTabsCalendars();
+}
+
+function updateAllTabsRegistrationModalCall() {
     chrome.runtime.sendMessage({
-        command: "updateAllTabsRegistrationModal",
-        isSaveable: isSaveable
+        command: "updateAllTabsRegistrationModal"
 	});
 }
 
@@ -48,11 +69,25 @@ function updateAllTabsCourseTableHighlightsCall() {
 	});
 }
 
+function updateAllTabsCalendars() {
+    chrome.runtime.sendMessage({
+        command: "updateAllTabsCalendars"
+	});
+}
+
 function checkUserOption(optionName, executeIfEnabled, executeIfDisabled) {
     chrome.storage.sync.get(optionName, function (data) {
         if (data[optionName]) executeIfEnabled();
         else executeIfDisabled();
     });
+}
+
+function listToCommaSeperatedString(list) {
+    let str = "";
+    list.forEach(function (name, index) {
+        str += name + (index != (list.length - 1) ? ", " : "");
+    })
+    return str;
 }
 
 function buildChartConfig(data) {
@@ -172,6 +207,36 @@ function buildChartConfig(data) {
     }
 }
 
+function capitalizeString(string) {
+    //if one word, and if multiple words:
+    let output = "";
+    words = string.split(/[. ,\/ -]/);
+    for (let i in words) {
+        word = words[i];
+        capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        output += capitalizedWord + " ";
+    }
+    return output.trim();
+}
+
+function makeLocationTimeDayMap(scheduleBlocks) {
+    let locationTimeDayMap = {};
+  
+    scheduleBlocks.forEach(function (scheduleBlock) {
+      if (!locationTimeDayMap[scheduleBlock.location])
+        locationTimeDayMap[scheduleBlock.location] = {};
+  
+      timeRangeString = convertScheduleBlockToTimeRangeString(scheduleBlock);
+      if (!locationTimeDayMap[scheduleBlock.location][timeRangeString])
+        locationTimeDayMap[scheduleBlock.location][timeRangeString] = [];
+      
+      let scheduledDay = convertMinutesToDay(scheduleBlock.startTimeInMinutes);
+      locationTimeDayMap[scheduleBlock.location][timeRangeString].push(dayToAbbreviationMap[scheduledDay]);
+    });
+  
+    return locationTimeDayMap;
+}
+
 /*********************  UTD Specific Utils  ************************/
 
 function getScheduleBlocksFromElement(jQueryCourseRowElement) {
@@ -194,4 +259,14 @@ function getScheduleBlocksFromElement(jQueryCourseRowElement) {
 function getClassUID(jQueryCourseRowElement) {
     let classInfo = getFirstChild(jQueryCourseRowElement.children("td").eq(1), "a").text(); // Get class info to remove from html text
     return jQueryCourseRowElement.children("td").eq(1).text().replace("\"", "").replace(classInfo, ""); // Isolate the unique class id
+}
+
+function seperateCourseNameParts(name) {
+    let num_index = name.indexOf(" ");
+    department = name.substring(0, num_index).trim();
+    number = name.substring(num_index).trim();
+    return {
+        department: department,
+        number: number
+    }
 }

@@ -1,5 +1,15 @@
+updateBadge(true);
 let grades = {};
 loadGradesJson();
+
+chrome.storage.onChanged.addListener(function (changes) {
+  for (key in changes) {
+      console.log(changes);
+      if (key === 'savedCourses') {
+          updateBadge(false, changes.savedCourses.newValue);
+      }
+  }
+});
 
 chrome.runtime.onInstalled.addListener(function (details) {
   if (details.reason == "install") {
@@ -46,17 +56,27 @@ chrome.runtime.onMessage.addListener(function (request, sender, response) {
         checkIfCourseIsSaved(request, response);
         break;
       case "determineCourseHighlight":
-          determineCourseHighlight(request, response);
+        determineCourseHighlight(request, response);
+        break;
+      case "getAllConflictingCourses":
+        getAllConflictingCourses(response);
         break;
       case "courseStorage":
-        if (request.action == "add") add(request, response);
-        if (request.action == "remove") remove(request, response);
+        if (request.action == "add") saveCourse(request, response);
+        if (request.action == "remove") removeCourse(request, response);
+        if (request.action == "clear") clearCourseStorage(response);
         break;
       case "updateAllTabsCourseTableHighlights":
         updateAllTabsCourseTableHighlights();
         break;
       case "updateAllTabsRegistrationModal":
-        updateAllTabsRegistrationModal(request);
+        updateAllTabsRegistrationModal();
+        break;
+      case "updateAllTabsCalendars":
+        updateAllTabsCalendars();
+        break;
+      case "updateBadge":
+        updateBadge();
         break;
       default:
         genericHttpRequest(request, response);
@@ -64,16 +84,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, response) {
   }
   return true;
 });
-
-function queryGrades(request, response) {
-  let result;
-  if (!grades[request.profName] || !grades[request.profName][request.classInfo]) { // Handle the case if there is no data
-    result = {}
-  } else {
-    result = grades[request.profName][request.classInfo];
-  }
-  response({ data: result });
-}
 
 function checkIfCourseIsSaved(request, response) {
   chrome.storage.sync.get("savedCourses", function (data) {
@@ -86,59 +96,76 @@ function checkIfCourseIsSaved(request, response) {
   });
 }
 
-function isScheduleBlockIntersecting(scheduleBlock1, scheduleBlock2) {
-    return !(scheduleBlock2.endTimeInMinutes < scheduleBlock1.startTimeInMinutes ||
-            scheduleBlock2.startTimeInMinutes > scheduleBlock1.endTimeInMinutes);
-}
-
 function determineCourseHighlight(request, response) {
   let currentCourseScheduleBlocks = request.scheduleBlocks;
-  let isConflicting = false;
+
   chrome.storage.sync.get("savedCourses", function (data) {
     let isSaved = !!data.savedCourses.find(function (course) {
       return course.classUID == request.classUID;
     })
     
+    let isConflicting = false;
     data.savedCourses.forEach(function (course) {
-      course.scheduleBlocks.forEach(function (scheduleBlock1) {
-         currentCourseScheduleBlocks.forEach(function (scheduleBlock2) {
-           if (isScheduleBlockIntersecting(scheduleBlock1, scheduleBlock2)) {
-             isConflicting = true;
-           }
-         });
-       });
-     });
+      if (isScheduleListConflicting(course.scheduleBlocks, currentCourseScheduleBlocks))
+        isConflicting = true;
+    });
     response({
       isConflicting: isConflicting,
       isSaved: isSaved
-    })
+    });
   });
 }
 
-// Add the requested course to the storage
-function add(request, sendResponse) {
+function getAllConflictingCourses(response) {
+  chrome.storage.sync.get("savedCourses", function (data) {
+    let savedCourseList = data.savedCourses;
+    let conflictingCourseArr = [];
+    for (let i = 0; i < savedCourseList.length; i++) {
+      for (let j = i + 1; j < savedCourseList.length; j++) {
+        if (isScheduleListConflicting(savedCourseList[i].scheduleBlocks, savedCourseList[j].scheduleBlocks)) {
+          conflictingCourseArr.push({ course1: savedCourseList[i], course2: savedCourseList[j] });
+        }
+      }
+    }
+    response({
+      conflictingCourses: conflictingCourseArr
+    });
+  });
+}
+
+function saveCourse(request, response) {
   chrome.storage.sync.get("savedCourses", function (data) {
     let courses = data.savedCourses;
     courses.push(request.course)
     chrome.storage.sync.set({
       savedCourses: courses
     });
-    sendResponse({
+    response({
       success: true
     });
   });
 }
 
-/// Find and Remove the requested course from the storage
-function remove(request, sendResponse) {
+function removeCourse(request, response) {
   chrome.storage.sync.get("savedCourses", function (data) {
       let courses = data.savedCourses.filter(function (value, index, arr) {
-        return value.classUID == request.UID;
+        return value.classUID != request.classUID;
       });
       chrome.storage.sync.set({
           savedCourses: courses
       });
-      sendResponse({
+      response({
+        success: true
+      });
+  });
+}
+
+function clearCourseStorage(response) {
+  chrome.storage.sync.get("savedCourses", function (data) {
+      chrome.storage.sync.set({
+          savedCourses: []
+      });
+      response({
         success: true
       });
   });
@@ -154,12 +181,21 @@ function updateAllTabsCourseTableHighlights() {
     });
 }
 
-function updateAllTabsRegistrationModal(request) {
+function updateAllTabsRegistrationModal() {
     chrome.tabs.query({}, function (tabs) {
         for (let i = 0; i < tabs.length; i++) {
             chrome.tabs.sendMessage(tabs[i].id, {
-                command: "updateRegistrationModal",
-                isSaveable: request.isSaveable
+                command: "updateRegistrationModal"
+            });
+        }
+    });
+}
+
+function updateAllTabsCalendars() {
+    chrome.tabs.query({}, function (tabs) {
+        for (let i = 0; i < tabs.length; i++) {
+            chrome.tabs.sendMessage(tabs[i].id, {
+                command: "updateCalendar"
             });
         }
     });
@@ -170,7 +206,6 @@ function genericHttpRequest(request, response) {
   const method = request.method ? request.method.toUpperCase() : "GET";
   xhr.open(method, request.url, true);
   xhr.onload = () => {
-    console.log(xhr.responseUrl);
     response(xhr.responseText);
   }
   xhr.onerror = () => response(xhr.statusText);
@@ -180,7 +215,29 @@ function genericHttpRequest(request, response) {
   xhr.send(request.data);
 }
 
+function isScheduleListConflicting(scheduleBlockArr1, scheduleBlockArr2) {
+  let isConflicting = false;
+  scheduleBlockArr1.forEach(function (scheduleBlock1) {
+    scheduleBlockArr2.forEach(function (scheduleBlock2) {
+      if (isScheduleBlockIntersecting(scheduleBlock1, scheduleBlock2)) {
+        isConflicting = true;
+      }
+    });
+  });
+  return isConflicting;
+}
+
 /*********************  UTD Specific Code  ************************/
+
+function queryGrades(request, response) {
+  let result;
+  if (!grades[request.profName] || !grades[request.profName][request.classInfo]) { // Handle the case if there is no data
+    result = {}
+  } else {
+    result = grades[request.profName][request.classInfo];
+  }
+  response({ data: result });
+}
 
 function loadGradesJson() {
   let fileNames = ["fall2017", "spring2018", "summer2018", "fall2018", "spring2019"]
@@ -188,7 +245,7 @@ function loadGradesJson() {
     loadJson("grades/" + fileName + ".json", function (gradeJson) {
       gradeJson.forEach(function (gradeDist) { // Map each grade distribution to a [professor][classInfo][term] group
         let profName = parseProfName(gradeDist.prof);
-        let classInfo = gradeDist.subj + " " + gradeDist.num + "." + gradeDist.sect;
+        let classInfo = gradeDist.subj + " " + gradeDist.num + "." + gradeDist.sect.padStart(3, "0");
         let processedGradeDist = convertStringValuesToNumbers(gradeDist.grades); // Some json files use strings instead of numbers
         if (!grades[profName])  {
           grades[profName] = {};
@@ -244,4 +301,33 @@ function convertStringValuesToNumbers(map) {
     if (typeof map[key] == "string") map[key] = parseInt(map[key], 10);
   });
   return map
+}
+
+function updateBadge(first, new_changes) {
+  if (new_changes) {
+      updateBadgeText(first, new_changes);
+  } else {
+      chrome.storage.sync.get('savedCourses', function (data) {
+          let courses = data.savedCourses;
+          updateBadgeText(first, courses);
+      });
+  }
+}
+
+function updateBadgeText(first, courses) {
+  let badge_text = courses.length > 0 ? `${courses.length}` : "";
+  let flash_time = !first ? 200 : 0;
+  chrome.browserAction.setBadgeText({
+      text: badge_text
+  });
+  if (!first) {
+      chrome.browserAction.setBadgeBackgroundColor({
+          color: Colors.badge_flash
+      });
+  }
+  setTimeout(function () {
+      chrome.browserAction.setBadgeBackgroundColor({
+          color: Colors.badge_default
+      });
+  }, flash_time);
 }

@@ -7,7 +7,9 @@ let classScheduleBlocks = [];
 
 let classInfo;
 let courseTitle;
-let profName;
+let profNames = [];
+let classRegistrationStatus;
+let moreInfoLink = "";
 
 $("body").on("click", "#registrationModal", function (event) {
     switch (event.target.id) {
@@ -45,16 +47,11 @@ function injectRegistrationModal() {
 function openRegistrationModal(jQueryCourseRowElement) {
     getClassData(jQueryCourseRowElement);
 
-	chrome.runtime.sendMessage({
-        command: "checkIfCourseIsSaved",
-        classUID: classUniqueId
-	}, function (response) {
-        if (response.isSaved) setCourseSaveable(false);
-        else setCourseSaveable(true);
-    });
+	updateSaveCourseButton();
 
     $("#courseTitle").html(courseTitle);
-    $("#profName").html("with " + profName);
+    let profNamesString = listToCommaSeperatedString(profNames);
+    if (profNamesString.length > 0) $("#profName").html("with " + profNamesString);
     
     updateModalGradeDist();
     
@@ -68,7 +65,9 @@ function saveCourse() {
     let extras = {
         classInfo: classInfo,
         courseTitle: courseTitle,
-        profName: profName
+        profNames: profNames,
+        classRegistrationStatus: classRegistrationStatus,
+        moreInfoLink: moreInfoLink
     }
     let currentCourse = new Course(classUniqueId, classScheduleBlocks, extras);
 	chrome.runtime.sendMessage({
@@ -76,8 +75,7 @@ function saveCourse() {
         action: "add",
         course: currentCourse
 	}, function (response) {
-        updateAllTabsRegistrationModalCall(false);
-        updateAllTabsCourseTableHighlightsCall();
+        updateAllTabsCourseData();
     });
 }
 
@@ -87,16 +85,17 @@ function removeCourse() {
         action: "remove",
         classUID: classUniqueId
 	}, function (response) {
-        updateAllTabsRegistrationModalCall(true);
-        updateAllTabsCourseTableHighlightsCall();
+        updateAllTabsCourseData();
     });
 }
 
 function redirectToRMP() {
-    let url = `http://www.ratemyprofessors.com/search.jsp?queryBy=teacherName&schoolName=university+of+texas+at+dallas&queryoption=HEADER&query=${profName};&facetSearch=true`;
-    setTimeout(function () {
-        window.open(url);
-    }, button_delay);
+    profNames.forEach(function (profName) {
+        let url = `http://www.ratemyprofessors.com/search.jsp?queryBy=teacherName&schoolName=university+of+texas+at+dallas&queryoption=HEADER&query=${profName};&facetSearch=true`;
+        setTimeout(function () {
+            window.open(url);
+        }, button_delay);
+    });
 }
 
 function close() {
@@ -106,7 +105,14 @@ function close() {
 function getClassData(jQueryCourseRowElement) {
     classInfo = getFirstChild(jQueryCourseRowElement.children("td").eq(1), "a").text();
     courseTitle = jQueryCourseRowElement.children("td").eq(2).text().replace(/\(.+\)/, ""); // Remove the "(Credit Hours)" text after the course name
-    profName = getFirstChild(jQueryCourseRowElement.children("td").eq(3), "a").text();
+    classRegistrationStatus = getFirstChild(jQueryCourseRowElement.children("td").eq(0), "span").text();
+    moreInfoLink = getFirstChild(jQueryCourseRowElement.children("td").eq(1), "a").attr("href");
+
+    profNameElements = jQueryCourseRowElement.children("td").eq(3).children("a");
+    profNames = [];
+    for (let i = 0; i < profNameElements.length; i++) {
+        profNames.push(profNameElements.eq(i).text());
+    }
 
     classUniqueId = getClassUID(jQueryCourseRowElement);
     classScheduleBlocks = getScheduleBlocksFromElement(jQueryCourseRowElement);
@@ -142,7 +148,7 @@ function populateChart(selectedSemester) {
 function getGrades(responseHandler) {
 	chrome.runtime.sendMessage({
 		command: "gradesQuery",
-        profName: profName,
+        profName: profNames[0],
         classInfo: classInfo
 	}, responseHandler);
 }
@@ -160,7 +166,7 @@ function toggleChartLoading(loading) {
 function setChart(data) {
 	// set up the chart
 	toggleChartLoading(false);
-	Highcharts.chart("chart", buildChartConfig(data), function (chart) { // on complete
+    Highcharts.chart("chart", buildChartConfig(data), function (chart) { // on complete
 		if (Object.keys(data).length == 0) {
 			//if no data, then show the message and hide the series
 			chart.renderer.text("Could not find data for this Instructor teaching this Course.", 100, 120)
@@ -182,7 +188,7 @@ function setChart(data) {
 chrome.runtime.onMessage.addListener(
 	function (request, sender, sendResponse) {
 		if (request.command == "updateRegistrationModal") {
-			setCourseSaveable(request.isSaveable);
+            updateSaveCourseButton();
 		}
 	}
 );
@@ -195,4 +201,14 @@ function setCourseSaveable(isSaveable) {
         $("#saveCourse").hide();
         $("#removeCourse").show();
     }
+}
+
+function updateSaveCourseButton() {
+    chrome.runtime.sendMessage({
+        command: "checkIfCourseIsSaved",
+        classUID: classUniqueId
+	}, function (response) {
+        if (response.isSaved) setCourseSaveable(false);
+        else setCourseSaveable(true);
+    });
 }
