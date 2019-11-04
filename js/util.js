@@ -263,10 +263,13 @@ function getClassUID(jQueryCourseRowElement) {
 
 function seperateCourseNameParts(name) {
     let num_index = name.indexOf(" ");
-    department = name.substring(0, num_index).trim();
-    number = name.substring(num_index).trim();
+    let section_index = name.indexOf(".");
+    let department = name.substring(0, num_index).trim();
+    let number = name.substring(num_index, section_index).trim();
+    let section = name.substring(section_index + 1).trim();
     return {
         department: department,
-        number: number
+        number: number,
+        section: section
     }
 }

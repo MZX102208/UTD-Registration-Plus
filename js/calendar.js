@@ -11,11 +11,8 @@ injectModal();
 
 chrome.storage.sync.get("savedCourses", function (data) {
     // Iterate through each saved course and add to 'event'
-    console.log(data);
     savedCourses = data.savedCourses;
-    console.log(savedCourses);
     let eventSource = buildEventSource(savedCourses);
-    console.log(eventSource);
 
     $("#calendar").fullCalendar({
         editable: false, // Don't allow editing of events
@@ -54,7 +51,6 @@ function injectModal() {
 }
 
 function displayModal(data) {
-    console.log(data);
     $("#modal").fadeIn(calendar_fade_time);
     $("#colorStrip").css('background-color', data.color);
     currCourse = savedCourses[data.index];
@@ -132,20 +128,22 @@ function makeLine(line) {
 
 // Iterate through each saved course and add to 'event'
 function buildEventSource(savedCourses) {
-    console.log(savedCourses);
     colorCounter = 0;
     let event_source = [];
     var hours = 0;
     for (let i = 0; i < savedCourses.length; i++) {
         let classInfo = savedCourses[i].extras.classInfo;
         let scheduleBlocks = savedCourses[i].scheduleBlocks;
-        console.log(savedCourses[i]);
-        let number = seperateCourseNameParts(classInfo).number;
-        hours += parseInt(number.charAt(1));
+
+        let {
+            number,
+            section
+        } = seperateCourseNameParts(classInfo);
+        console.log(section);
+        if (section != "701") hours += parseInt(number.charAt(1)); // section 701 is an exam section, and does not count as credit hours
         for (let j = 0; j < scheduleBlocks.length; j++) {
             let session = scheduleBlocks[j]; // One single session for a class
             let event_obj = setEventForSection(session, colorCounter, i);
-            console.log(event_obj);
             event_source.push(event_obj);
         }
         colorCounter++;
@@ -162,22 +160,21 @@ function displayMetaData(hours, savedCourses) {
 //create the event object for every section
 function setEventForSection(session, colorCounter, i) {
     let fullDay = convertMinutesToDay(session.startTimeInMinutes);
-    console.log(fullDay);
     let course = savedCourses[i];
     let coursename = course.extras.classInfo;
     let profname = listToCommaSeperatedString(course.extras.profNames);
     profname = profname.length > 0 ? "with " + profname : "";
     let {
         department,
-        number
+        number,
+        section
     } = seperateCourseNameParts(coursename);
     let begDay = calculateBeginningDate(fullDay);
-    console.log(begDay);
     let startDate = formatCalculateDate(begDay, fullDay, convertMinutesToHoursStringNoSuffix(session.startTimeInMinutes));
     let endDate = formatCalculateDate(begDay, fullDay, convertMinutesToHoursStringNoSuffix(session.endTimeInMinutes));
 
     event_obj = {
-        title: `${department}-${number} ${profname}`,
+        title: `${department}-${number}.${section} ${profname}`,
         start: startDate,
         end: endDate,
         color: Colors.material_colors[colorCounter],
@@ -185,7 +182,6 @@ function setEventForSection(session, colorCounter, i) {
         index: i,
         allday: false
     };
-    console.log(event_obj);
     return event_obj;
 }
 
@@ -315,7 +311,6 @@ $("body").on("click", "#modal", function (event) {
 });
 
 function close() {
-    console.log("test");
     $("#modal").fadeOut(calendar_fade_time);
 }
 

@@ -4,7 +4,6 @@ loadGradesJson();
 
 chrome.storage.onChanged.addListener(function (changes) {
   for (key in changes) {
-      console.log(changes);
       if (key === 'savedCourses') {
           updateBadge(false, changes.savedCourses.newValue);
       }
@@ -315,7 +314,7 @@ function updateBadge(first, new_changes) {
 }
 
 function updateBadgeText(first, courses) {
-  let badge_text = courses.length > 0 ? `${courses.length}` : "";
+  let badge_text = (courses && courses.length > 0) ? `${courses.length}` : "";
   let flash_time = !first ? 200 : 0;
   chrome.browserAction.setBadgeText({
       text: badge_text
