@@ -8,10 +8,10 @@ $(document).ready(function () {
     checkUserOption("courseConflictHighlight", highlightCourseTable, undoCourseTableHighlight);
 });
 
-// Using a Mutation Observer to detect changes in the site"s html
+// Using a Mutation Observer to detect changes in the site's html
 let observer = new MutationObserver(function (mutations) {
     mutations.forEach(function (mutation) {
-        if (mutation.target.className == "rowcount") { // Check if the course table has been modified
+        if (mutation.target.className == "search-panel-form-div") { // Check if the course table has been modified
             checkUserOption("courseConflictHighlight", highlightCourseTable, undoCourseTableHighlight);
             addRegistrationPlusColumn();
         }
@@ -36,6 +36,9 @@ function addRegistrationPlusColumn() {
     // Get the elements for the course table
     let tableHeadRow = getFirstDescendant(courseTable, ["thead", "tr"]);
     let tableBodyRows = getFirstChild(courseTable, "tbody").children("tr");
+
+    // Only add the plus column if it hasn't been added yet
+    if (tableHeadRow.has('th:contains("Plus")').length) return;
 
     // Append header column
     let newHeader = document.createElement("th");

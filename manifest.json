@@ -1,6 +1,6 @@
 {
   "name": "UTD Registration Plus",
-  "version": "0.0.0.2",
+  "version": "0.0.0.3",
   "description": "Improves the course registration process at the University of Texas at Dallas!",
   "permissions": ["tabs",
     "declarativeContent",

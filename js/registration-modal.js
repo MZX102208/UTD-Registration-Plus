@@ -90,7 +90,7 @@ function removeCourse() {
 }
 
 function redirectToRMP() {
-    profNames.forEach(function (profName) {
+    profNames.forEach(function (profName) { 
         let url = `http://www.ratemyprofessors.com/search.jsp?queryBy=teacherName&schoolName=university+of+texas+at+dallas&queryoption=HEADER&query=${profName};&facetSearch=true`;
         setTimeout(function () {
             window.open(url);
