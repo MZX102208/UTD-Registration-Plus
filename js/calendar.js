@@ -130,7 +130,8 @@ function makeLine(line) {
 function buildEventSource(savedCourses) {
     colorCounter = 0;
     let event_source = [];
-    var hours = 0;
+    let hours = 0;
+    let courseCount = 0;
     for (let i = 0; i < savedCourses.length; i++) {
         let classInfo = savedCourses[i].extras.classInfo;
         let scheduleBlocks = savedCourses[i].scheduleBlocks;
@@ -139,8 +140,10 @@ function buildEventSource(savedCourses) {
             number,
             section
         } = seperateCourseNameParts(classInfo);
-        console.log(section);
-        if (section != "701") hours += parseInt(number.charAt(1)); // section 701 is an exam section, and does not count as credit hours
+        if (section != "701") { // section 701 is an exam section, and does not count as credit hours
+            hours += parseInt(number.charAt(1));
+            courseCount++;
+        }
         for (let j = 0; j < scheduleBlocks.length; j++) {
             let session = scheduleBlocks[j]; // One single session for a class
             let event_obj = setEventForSection(session, colorCounter, i);
@@ -148,13 +151,13 @@ function buildEventSource(savedCourses) {
         }
         colorCounter++;
     }
-    displayMetaData(hours, savedCourses);
+    displayMetaData(hours, courseCount);
     return event_source;
 }
 
-function displayMetaData(hours, savedCourses) {
+function displayMetaData(hours, courseCount) {
     $("#hours").text(hours + " Hours");
-    $("#num").text(savedCourses.length + " Courses");
+    $("#num").text(courseCount + " Courses");
 }
 
 //create the event object for every section
